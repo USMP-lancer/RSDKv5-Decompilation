@@ -4,8 +4,8 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "
 set(VITASDK_CMAKE_FILE "$ENV{VITASDK}/share/vita.cmake" CACHE PATH "VitaSDK CMake functions file")
 include("${VITASDK_CMAKE_FILE}" REQUIRED)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fpermissive -g2 -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fpermissive -g2 -std=c++11")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -O2 -fsigned-char -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -O2 -fsigned-char -fpermissive -std=c++17")
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1 -d ATTRIBUTE2=12")
 set(VITA_ELF_CREATE_FLAGS "")
 
@@ -116,11 +116,12 @@ vita_create_self("${SELF}"
 # Build VPK
 
 set(VPK "SonicMania.vpk")
-set(TITLE_NAME "Sonic 1")
+set(TITLE_NAME "Sonic Mania")
 set(TITLE_ID "MANIA0001")
 set(TITLE_VER "01.00")
 
 vita_create_vpk("${VPK}" "${TITLE_ID}" "${SELF}"
   NAME "${TITLE_NAME}"
   VERSION "${TITLE_VER}"
+  FILE mania_livearea sce_sys
 )

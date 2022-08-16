@@ -1,6 +1,8 @@
 ![header](https://user-images.githubusercontent.com/29069561/183143615-d7f77921-13cf-4c58-8c5f-6a1e76ea20e2.svg)
 
-A complete decompilation of Retro Engine v5 and v5Ultimate.
+A complete decompilation of Retro Engine v5 and v5Ultimate For the PSVita.
+
+## LiveArea Assets by [Danhanado](https://twitter.com/Danhanad0)
 
 # **SUPPORT THE DEVELOPERS OF THE RETRO ENGINE**
 We do not own the Retro Engine in any way, shape or form, and this project would not have been possible had they not developed RSDKv5(U) in the first place. Retro Engine is currently owned by [Evening Star](https://eveningstar.studio/); we highly urge you to follow & support their projects if you enjoyed this project of ours!
