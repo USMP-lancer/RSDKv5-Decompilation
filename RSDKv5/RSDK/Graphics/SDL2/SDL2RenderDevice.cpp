@@ -20,6 +20,10 @@ uint8 RenderDevice::lastTextureFormat = -1;
 
 bool RenderDevice::Init()
 {
+#if RETRO_PLATFORM == RETRO_VITA
+    /* Disable Back Touchpad to prevent "misclicks" */
+    SDL_setenv("VITA_DISABLE_TOUCH_BACK", "1", 1);
+#endif
     const char *gameTitle = gameVerInfo.gameTitle;
 
     SDL_InitSubSystem(SDL_INIT_VIDEO | SDL_INIT_EVENTS);

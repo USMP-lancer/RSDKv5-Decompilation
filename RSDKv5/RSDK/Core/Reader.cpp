@@ -126,19 +126,17 @@ bool32 RSDK::LoadDataPack(const char *filePath, size_t fileOffset, bool32 useBuf
 
     InitFileInfo(&info);
     info.externalFile = true;
-    printf("Loading data pack: %s\n", dataPackPath);
     if (LoadFile(&info, dataPackPath, FMODE_RB)) {
         uint32 sig = ReadInt32(&info, false);
         if (sig != RSDK_SIGNATURE_RSDK)
             return false;
-        printf("Pass the signature check\n");
+
         useDataPack = true;
 
         ReadInt8(&info); // 'v'
         ReadInt8(&info); // version
 
         strcpy(dataPacks[dataPackCount].name, dataPackPath);
-        printf("strcpy\n");
         dataPacks[dataPackCount].fileCount = ReadInt16(&info);
         for (int32 f = 0; f < dataPacks[dataPackCount].fileCount; ++f) {
             uint8 b[4];
@@ -155,7 +153,7 @@ bool32 RSDK::LoadDataPack(const char *filePath, size_t fileOffset, bool32 useBuf
             dataFileList[f].useFileBuffer = useBuffer;
             dataFileList[f].packID        = dataPackCount;
         }
-        printf("First Loop\n");
+
         dataPacks[dataPackCount].fileBuffer = NULL;
         if (useBuffer) {
             dataPacks[dataPackCount].fileBuffer = (uint8 *)malloc(info.fileSize);
@@ -168,11 +166,8 @@ bool32 RSDK::LoadDataPack(const char *filePath, size_t fileOffset, bool32 useBuf
                 ReadBytes(&info, dataPacks[dataPackCount].fileBuffer, info.fileSize);
             }
         }
-        printf("Second Loop\n");
         dataFileListCount += dataPacks[dataPackCount].fileCount;
         dataPackCount++;
-
-        printf("Crash?\n");
 
         CloseFile(&info);
 
