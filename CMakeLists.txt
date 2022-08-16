@@ -71,7 +71,7 @@ add_executable("${ELF}"
   dependencies/all/miniz/miniz.c
 )
 
-target_compile_definitions("${ELF}" PUBLIC -DBASE_PATH="ux0:data/Mania/" -DGAME_MAIN=main -DRETRO_REVISION=3 -DRETRO_STANDALONE=0 -DRETRO_USE_ORIGINAL_CODE=0 -DRETRO_USE_MOD_LOADER=0 -D__VITA__)
+target_compile_definitions("${ELF}" PUBLIC -DBASE_PATH="ux0:data/Mania/" -DGAME_MAIN=main -DRETRO_REVISION=3 -DRETRO_STANDALONE=0 -DRETRO_USE_ORIGINAL_CODE=0 -DRETRO_USE_MOD_LOADER=0 -DRETRO_DISABLE_LOG=1 -D__VITA__)
 
 target_link_libraries("${ELF}"
   SDL2
