@@ -138,9 +138,9 @@ enum GameRegions {
 #elif defined __VITA__
 #define RETRO_PLATFORM   (RETRO_VITA)
 #define RETRO_DEVICETYPE (RETRO_STANDARD)
-// #elif defined __linux__
-// #define RETRO_PLATFORM   (RETRO_LINUX)
-// #define RETRO_DEVICETYPE (RETRO_STANDARD)
+#elif defined __linux__
+#define RETRO_PLATFORM   (RETRO_LINUX)
+#define RETRO_DEVICETYPE (RETRO_STANDARD)
 #else
 #define RETRO_PLATFORM   (RETRO_WIN)
 #define RETRO_DEVICETYPE (RETRO_STANDARD)

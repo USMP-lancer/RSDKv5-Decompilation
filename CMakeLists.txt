@@ -21,6 +21,8 @@ include_directories(
   dependencies/all/iniparser/
   "$ENV{VITASDK}/arm-vita-eabi/include/SDL2"
   "$ENV{VITASDK}/arm-vita-eabi/include/freetype2"
+  Game/
+  Game/Objects/
 )
 
 # Build self
@@ -28,11 +30,13 @@ include_directories(
 set(ELF "sonicmania.elf")
 set(SELF "eboot.bin")
 
-file(GLOB_RECURSE sonic_SRC
+file(GLOB_RECURSE Game_SRC
     RSDKv5/*.cpp
 )
 
 add_executable("${ELF}"
+  Game/Game.c
+  Game/Objects/All.c
   RSDKv5/main.cpp
   RSDKv5/RSDK/Core/RetroEngine.cpp
   RSDKv5/RSDK/Core/Math.cpp
@@ -67,7 +71,7 @@ add_executable("${ELF}"
   dependencies/all/miniz/miniz.c
 )
 
-target_compile_definitions("${ELF}" PUBLIC -DBASE_PATH="ux0:data/Mania/" -DRETRO_REVISION=3 -DRETRO_STANDALONE=1 -DRETRO_USE_ORIGINAL_CODE=0 -DRETRO_USE_MOD_LOADER=0 -D__VITA__)
+target_compile_definitions("${ELF}" PUBLIC -DBASE_PATH="ux0:data/Mania/" -DGAME_MAIN=main -DRETRO_REVISION=3 -DRETRO_STANDALONE=0 -DRETRO_USE_ORIGINAL_CODE=0 -DRETRO_USE_MOD_LOADER=0 -D__VITA__)
 
 target_link_libraries("${ELF}"
   SDL2
