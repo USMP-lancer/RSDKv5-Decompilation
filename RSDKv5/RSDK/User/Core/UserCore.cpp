@@ -280,7 +280,7 @@ void RSDK::LoadSettingsINI()
 #endif
 
     // Consoles load the entire file and buffer it, while PC just io's the file when needed
-    bool32 useBuffer = !(platform == PLATFORM_PC || platform == PLATFORM_DEV || RETRO_PLATFORM == RETRO_VITA);
+    bool32 useBuffer = !(platform == PLATFORM_PC || platform == PLATFORM_DEV);
 
     char pathBuffer[0x100];
     sprintf_s(pathBuffer, (int32)sizeof(pathBuffer), "%sSettings.ini", SKU::userFileDir);

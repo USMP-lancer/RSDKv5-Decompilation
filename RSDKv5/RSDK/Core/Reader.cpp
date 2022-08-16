@@ -159,8 +159,14 @@ bool32 RSDK::LoadDataPack(const char *filePath, size_t fileOffset, bool32 useBuf
         dataPacks[dataPackCount].fileBuffer = NULL;
         if (useBuffer) {
             dataPacks[dataPackCount].fileBuffer = (uint8 *)malloc(info.fileSize);
-            Seek_Set(&info, 0);
-            ReadBytes(&info, dataPacks[dataPackCount].fileBuffer, info.fileSize);
+            if (dataPacks[dataPackCount].fileBuffer == NULL) {
+                useBuffer = 0;
+                printf("Failed to allocate memory for data pack buffer\n");
+            }
+            else {
+                Seek_Set(&info, 0);
+                ReadBytes(&info, dataPacks[dataPackCount].fileBuffer, info.fileSize);
+            }
         }
         printf("Second Loop\n");
         dataFileListCount += dataPacks[dataPackCount].fileCount;
