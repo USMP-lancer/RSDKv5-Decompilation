@@ -108,6 +108,7 @@ struct VideoSettings {
     uint8 vsync;
     uint8 tripleBuffered;
     uint8 shaderSupport;
+    uint8 forceIntegerScaling;
     int32 fsWidth;
     int32 fsHeight;
     int32 refreshRate;

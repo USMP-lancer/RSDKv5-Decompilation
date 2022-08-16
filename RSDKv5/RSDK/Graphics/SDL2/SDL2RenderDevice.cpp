@@ -509,6 +509,10 @@ bool RenderDevice::InitGraphicsAPI()
     SDL_RenderSetLogicalSize(renderer, videoSettings.pixWidth, SCREEN_YSIZE);
     SDL_SetRenderDrawBlendMode(renderer, SDL_BLENDMODE_BLEND);
 
+    if (videoSettings.forceIntegerScaling) {
+        SDL_RenderSetIntegerScale(renderer, SDL_TRUE);
+    }
+
     if (maxPixHeight <= 256) {
         textureSize.x = 512.0;
         textureSize.y = 256.0;

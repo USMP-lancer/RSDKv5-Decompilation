@@ -355,6 +355,7 @@ void RSDK::LoadSettingsINI()
         videoSettings.refreshRate   = iniparser_getint(ini, "Video:refreshRate", 60);
         videoSettings.shaderSupport = iniparser_getboolean(ini, "Video:shaderSupport", true);
         videoSettings.shaderID      = iniparser_getint(ini, "Video:screenShader", SHADER_NONE);
+        videoSettings.forceIntegerScaling = iniparser_getboolean(ini, "Video:forceIntegerScaling", false);
 
 #if !RETRO_USE_ORIGINAL_CODE
         customSettings.maxPixWidth = iniparser_getint(ini, "Video:maxPixWidth", DEFAULT_PIXWIDTH);
@@ -485,6 +486,7 @@ void RSDK::LoadSettingsINI()
         videoSettings.fsHeight       = 0;
         videoSettings.refreshRate    = 60;
         videoSettings.shaderID       = SHADER_NONE;
+        videoSettings.forceIntegerScaling = false;
 
         engine.streamsEnabled = true;
         engine.streamVolume   = 1.0f;
@@ -633,6 +635,8 @@ void RSDK::SaveSettingsINI(bool32 writeToFile)
 
         WriteText(file, "shaderSupport=%s\n", (videoSettings.shaderSupport ? "y" : "n"));
         WriteText(file, "screenShader=%d\n", videoSettings.shaderID);
+
+        WriteText(file, "forceIntegerScaling=%d\n", videoSettings.forceIntegerScaling);
 
 #if !RETRO_USE_ORIGINAL_CODE
         WriteText(file, "; Maximum width the screen will be allowed to be. A value of 0 will disable the maximum width\n");
