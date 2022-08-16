@@ -1,6 +1,8 @@
 #include "RSDK/Core/RetroEngine.hpp"
 #include "main.hpp"
 
+int _newlib_heap_size_user = 300 * 1024 * 1024;
+
 #ifdef __SWITCH__
 #include <switch.h>
 #include <stdlib.h>

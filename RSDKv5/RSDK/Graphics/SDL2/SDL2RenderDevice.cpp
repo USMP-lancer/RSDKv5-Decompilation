@@ -43,6 +43,11 @@ bool RenderDevice::Init()
     videoSettings.windowWidth  = 1920;
     videoSettings.windowHeight = 1080;
     flags |= SDL_WINDOW_FULLSCREEN;
+#elif RETRO_PLATFORM == RETRO_VITA
+    videoSettings.windowed     = false;
+    videoSettings.windowWidth  = 960;
+    videoSettings.windowHeight = 544;
+    flags |= SDL_WINDOW_FULLSCREEN;
 #endif
 
     SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "nearest");

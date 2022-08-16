@@ -17,7 +17,7 @@ int32 GetAPIValue(uint32 id)
         case 0x3D6BD740: // SYSTEM_PLATFORM
 
             // Platform Overrides
-#if RETRO_PLATFORM == RETRO_PS4
+#if RETRO_PLATFORM == RETRO_PS4 || RETRO_PLATFORM == RETRO_VITA
             return PLATFORM_PS4;
 #elif RETRO_PLATFORM == RETRO_XB1
             return PLATFORM_XB1;

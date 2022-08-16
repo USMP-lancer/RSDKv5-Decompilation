@@ -1163,6 +1163,10 @@ void RSDK::SKU::InitUserDirectory()
 
     SKU::SetUserFileCallbacks("./", NULL, NULL);
 
+#elif RETRO_PLATFORM == RETRO_VITA
+
+    SKU::SetUserFileCallbacks("ux0:data/Mania/", NULL, NULL);
+
 #else
 
     SKU::SetUserFileCallbacks("", NULL, NULL);

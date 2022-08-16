@@ -85,7 +85,7 @@ void RSDK::SKU::InitUserCore()
     engine.confirmFlip = userCore->GetConfirmButtonFlip();
 #else
 
-#if RETRO_PLATFORM == RETRO_PS4
+#if RETRO_PLATFORM == RETRO_PS4 || RETRO_PLATFORM == RETRO_VITA
     gameVerInfo.platform = PLATFORM_PS4;
 #elif RETRO_PLATFORM == RETRO_XB1
     gameVerInfo.platform = PLATFORM_XB1;
@@ -280,7 +280,7 @@ void RSDK::LoadSettingsINI()
 #endif
 
     // Consoles load the entire file and buffer it, while PC just io's the file when needed
-    bool32 useBuffer = !(platform == PLATFORM_PC || platform == PLATFORM_DEV);
+    bool32 useBuffer = !(platform == PLATFORM_PC || platform == PLATFORM_DEV || RETRO_PLATFORM == RETRO_VITA);
 
     char pathBuffer[0x100];
     sprintf_s(pathBuffer, (int32)sizeof(pathBuffer), "%sSettings.ini", SKU::userFileDir);
