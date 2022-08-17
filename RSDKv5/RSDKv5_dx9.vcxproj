@@ -636,23 +636,23 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\Intermediate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\v5\DX9\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LinkIncremental>true</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\Intermediate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\v5\DX9\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\</OutDir>
-    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\Intermediate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\v5\DX9\Intermediate\</IntDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <LinkIncremental>false</LinkIncremental>
     <OutDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\</OutDir>
     <TargetName>$(ProjectName)_64</TargetName>
-    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\DX9\Intermediate\</IntDir>
+    <IntDir>$(SolutionDir)build\$(Platform)\$(Configuration)\v5\DX9\Intermediate\</IntDir>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -673,14 +673,6 @@
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies/windows/SDL2/lib/$(PlatformTargetAsMSBuildArchitecture)/;$(SolutionDir)dependencies/windows/libtheora/win32/VS2010/$(Platform)/$(Configuration)/;$(SolutionDir)dependencies/windows/libogg/win32/VS2015/$(Platform)/$(Configuration)/</AdditionalLibraryDirectories>
       <AdditionalDependencies>libogg.lib;libtheora_static.lib;d3d9.lib;d3dcompiler.lib;XInput.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <When Condition=" '$(VCPKG)'!='Y' ">
-      <PostBuildEvent>
-        <Command>copy /Y "$(SolutionDir)dependencies\windows\SDL2\lib\$(PlatformTargetAsMSBuildArchitecture)\$(Configuration)\SDL2.dll" "$(OutDir)" </Command>
-      </PostBuildEvent>
-      <PostBuildEvent>
-        <Message>copying SDL2 library DLL to the build directory. build should fail if it's not found</Message>
-      </PostBuildEvent>
-    </When>
     <PostBuildEvent>
       <Command>
       </Command>
@@ -704,14 +696,6 @@
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies/windows/SDL2/lib/$(PlatformTargetAsMSBuildArchitecture)/;$(SolutionDir)dependencies/windows/libtheora/win32/VS2010/$(Platform)/$(Configuration)/;$(SolutionDir)dependencies/windows/libogg/win32/VS2015/$(Platform)/$(Configuration)/</AdditionalLibraryDirectories>
       <AdditionalDependencies>libogg.lib;libtheora_static.lib;d3d9.lib;d3dcompiler.lib;XInput.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <When Condition=" '$(VCPKG)'!='Y' ">
-      <PostBuildEvent>
-        <Command>copy /Y "$(SolutionDir)dependencies\windows\SDL2\lib\$(PlatformTargetAsMSBuildArchitecture)\$(Configuration)\SDL2.dll" "$(OutDir)" </Command>
-      </PostBuildEvent>
-      <PostBuildEvent>
-        <Message>copying SDL2 library DLL to the build directory. build should fail if it's not found</Message>
-      </PostBuildEvent>
-    </When>
     <PostBuildEvent>
       <Command>
       </Command>
@@ -739,18 +723,6 @@
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies/windows/SDL2/lib/$(PlatformTargetAsMSBuildArchitecture)/;$(SolutionDir)dependencies/windows/libtheora/win32/VS2010/$(Platform)/$(Configuration)/;$(SolutionDir)dependencies/windows/libogg/win32/VS2015/$(Platform)/$(Configuration)/</AdditionalLibraryDirectories>
       <AdditionalDependencies>libogg.lib;libtheora_static.lib;d3d9.lib;d3dcompiler.lib;XInput.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <When Condition=" '$(VCPKG)'!='Y' ">
-      <PostBuildEvent>
-        <Command>copy /Y "$(SolutionDir)dependencies\windows\SDL2\lib\$(PlatformTargetAsMSBuildArchitecture)\$(Configuration)\SDL2.dll" "$(OutDir)" </Command>
-      </PostBuildEvent>
-      <PostBuildEvent>
-        <Message>copying SDL2 library DLL to the build directory. build should fail if it's not found</Message>
-      </PostBuildEvent>
-    </When>
-    <PostBuildEvent>
-      <Command>
-      </Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -774,14 +746,6 @@
       <AdditionalLibraryDirectories>$(SolutionDir)dependencies/windows/SDL2/lib/$(PlatformTargetAsMSBuildArchitecture)/;$(SolutionDir)dependencies/windows/libtheora/win32/VS2010/$(Platform)/$(Configuration)/;$(SolutionDir)dependencies/windows/libogg/win32/VS2015/$(Platform)/$(Configuration)/</AdditionalLibraryDirectories>
       <AdditionalDependencies>libogg.lib;libtheora_static.lib;d3d9.lib;d3dcompiler.lib;XInput.lib;winmm.lib;comctl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
-    <When Condition=" '$(VCPKG)'!='Y' ">
-      <PostBuildEvent>
-        <Command>copy /Y "$(SolutionDir)dependencies\windows\SDL2\lib\$(PlatformTargetAsMSBuildArchitecture)\$(Configuration)\SDL2.dll" "$(OutDir)" </Command>
-      </PostBuildEvent>
-      <PostBuildEvent>
-        <Message>copying SDL2 library DLL to the build directory. build should fail if it's not found</Message>
-      </PostBuildEvent>
-    </When>
     <PostBuildEvent>
       <Command>
       </Command>
