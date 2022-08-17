@@ -1,7 +1,10 @@
 #include "RSDK/Core/RetroEngine.hpp"
 #include "main.hpp"
 
-int _newlib_heap_size_user = 320 * 1024 * 1024;
+#ifdef __vita__
+int _newlib_heap_size_user = 256 * 1024 * 1024;
+#include <psp2/sysmodule.h>
+#endif
 
 #ifdef __SWITCH__
 #include <switch.h>
@@ -79,6 +82,9 @@ int32 RSDK_main(int32 argc, char **argv, void *linkLogicPtr)
 {
 #ifdef __SWITCH__
     // initNxLink();
+#endif
+#ifdef __vita__
+    sceSysmoduleLoadModule(SCE_SYSMODULE_NET);
 #endif
 
     RSDK::linkGameLogic = (RSDK::LogicLinkHandle)linkLogicPtr;

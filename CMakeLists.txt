@@ -9,7 +9,7 @@ set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -O2 -fsigned-char -fpermissi
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1 -d ATTRIBUTE2=12")
 set(VITA_ELF_CREATE_FLAGS "")
 
-project(Sonic12-Vita)
+project(SonicMania-Vita)
 
 include_directories(
   RSDKv5/
@@ -100,6 +100,8 @@ target_link_libraries("${ELF}"
   SceIofilemgr_stub
   SceSsl_stub
   SceSysmodule_stub
+  SceNet_stub
+  SceNetCtl_stub
   -Wl,--whole-archive pthread -Wl,--no-whole-archive
   ${SDL2_LIBRARIES}
   gcc
