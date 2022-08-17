@@ -4,6 +4,8 @@
 #include "Legacy/ObjectLegacy.cpp"
 #endif
 
+#include <thread>
+
 using namespace RSDK;
 
 ObjectClass RSDK::objectClassList[OBJECT_COUNT];
@@ -722,198 +724,204 @@ void RSDK::ProcessFrozenObjects()
     RunModCallbacks(MODCB_ONLATEUPDATE, INT_TO_VOID(ENGINESTATE_FROZEN));
 #endif
 }
+
+void ProcessLayers(int s) {
+    currentScreen             = &screens[s];
+    sceneInfo.currentScreenID = s;
+
+    for (int32 l = 0; l < DRAWGROUP_COUNT; ++l) drawGroups[l].layerCount = 0;
+
+    for (int32 t = 0; t < LAYER_COUNT; ++t) {
+        uint8 drawGroup = tileLayers[t].drawGroup[s];
+
+        if (drawGroup < DRAWGROUP_COUNT)
+            drawGroups[drawGroup].layerDrawList[drawGroups[drawGroup].layerCount++] = t;
+    }
+
+    sceneInfo.currentDrawGroup = 0;
+    for (int32 l = 0; l < DRAWGROUP_COUNT; ++l) {
+        if (engine.drawGroupVisible[l]) {
+            DrawList *list = &drawGroups[l];
+
+            if (list->hookCB)
+                list->hookCB();
+
+            if (list->sorted) {
+                for (int32 e = 0; e < list->entityCount; ++e) {
+                    for (int32 i = list->entityCount - 1; i > e; --i) {
+                        int32 slot1 = list->entries[i - 1];
+                        int32 slot2 = list->entries[i];
+                        if (objectEntityList[slot2].zdepth > objectEntityList[slot1].zdepth) {
+                            list->entries[i - 1] = slot2;
+                            list->entries[i]     = slot1;
+                        }
+                    }
+                }
+            }
+
+            for (int32 i = 0; i < list->entityCount; ++i) {
+                sceneInfo.entitySlot = list->entries[i];
+                validDraw            = false;
+                sceneInfo.entity     = &objectEntityList[list->entries[i]];
+                if (sceneInfo.entity->visible) {
+                    if (objectClassList[stageObjectIDs[sceneInfo.entity->classID]].draw)
+                        objectClassList[stageObjectIDs[sceneInfo.entity->classID]].draw();
+
+#if RETRO_VER_EGS || RETRO_USE_DUMMY_ACHIEVEMENTS
+                    if (i == list->entityCount - 1)
+                        SKU::DrawAchievements();
+#endif
+
+                    sceneInfo.entity->onScreen |= validDraw << sceneInfo.currentScreenID;
+                }
+            }
+            for (int32 i = 0; i < list->layerCount; ++i) {
+                TileLayer *layer = &tileLayers[list->layerDrawList[i]];
+
+#if RETRO_USE_MOD_LOADER
+                RunModCallbacks(MODCB_ONSCANLINECB, (void *)layer->scanlineCallback);
+#endif
+                if (layer->scanlineCallback)
+                    layer->scanlineCallback(scanlines);
+                else
+                    ProcessParallax(layer);
+
+                switch (layer->type) {
+                    case LAYER_HSCROLL: DrawLayerHScroll(layer); break;
+                    case LAYER_VSCROLL: DrawLayerVScroll(layer); break;
+                    case LAYER_ROTOZOOM: DrawLayerRotozoom(layer); break;
+                    case LAYER_BASIC: DrawLayerBasic(layer); break;
+                    default: break;
+                }
+            }
+
+#if RETRO_USE_MOD_LOADER
+            RunModCallbacks(MODCB_ONDRAW, INT_TO_VOID(l));
+#endif
+
+            if (currentScreen->clipBound_X1 > 0)
+                currentScreen->clipBound_X1 = 0;
+
+            if (currentScreen->clipBound_Y1 > 0)
+                currentScreen->clipBound_Y1 = 0;
+
+            if (currentScreen->size.x >= 0) {
+                if (currentScreen->clipBound_X2 < currentScreen->size.x)
+                    currentScreen->clipBound_X2 = currentScreen->size.x;
+            }
+            else {
+                currentScreen->clipBound_X2 = 0;
+            }
+
+            if (currentScreen->size.y >= 0) {
+                if (currentScreen->clipBound_Y2 < currentScreen->size.y)
+                    currentScreen->clipBound_Y2 = currentScreen->size.y;
+            }
+            else {
+                currentScreen->clipBound_Y2 = 0;
+            }
+        }
+
+        sceneInfo.currentDrawGroup++;
+    }
+
+#if !RETRO_USE_ORIGINAL_CODE
+    if (showHitboxes) {
+        for (int32 i = 0; i < debugHitboxCount; ++i) {
+            DebugHitboxInfo *info = &debugHitboxList[i];
+            int32 x               = info->pos.x + TO_FIXED(info->hitbox.left);
+            int32 y               = info->pos.y + TO_FIXED(info->hitbox.top);
+            int32 w               = abs((info->pos.x + TO_FIXED(info->hitbox.right)) - x);
+            int32 h               = abs((info->pos.y + TO_FIXED(info->hitbox.bottom)) - y);
+
+            switch (info->type) {
+                case H_TYPE_TOUCH: DrawRectangle(x, y, w, h, info->collision ? 0x808000 : 0xFF0000, 0x60, INK_ALPHA, false); break;
+
+                case H_TYPE_CIRCLE:
+                    DrawCircle(info->pos.x, info->pos.y, info->hitbox.left, info->collision ? 0x808000 : 0xFF0000, 0x60, INK_ALPHA, false);
+                    break;
+
+                case H_TYPE_BOX:
+                    DrawRectangle(x, y, w, h, 0x0000FF, 0x60, INK_ALPHA, false);
+
+                    if (info->collision & 1) // top
+                        DrawRectangle(x, y, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
+
+                    if (info->collision & 8) // bottom
+                        DrawRectangle(x, y + h, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
+
+                    if (info->collision & 2) { // left
+                        int32 sy = y;
+                        int32 sh = h;
+
+                        if (info->collision & 1) {
+                            sy += TO_FIXED(1);
+                            sh -= TO_FIXED(1);
+                        }
+
+                        if (info->collision & 8)
+                            sh -= TO_FIXED(1);
+
+                        DrawRectangle(x, sy, TO_FIXED(1), sh, 0xFFFF00, 0xC0, INK_ALPHA, false);
+                    }
+
+                    if (info->collision & 4) { // right
+                        int32 sy = y;
+                        int32 sh = h;
+
+                        if (info->collision & 1) {
+                            sy += TO_FIXED(1);
+                            sh -= TO_FIXED(1);
+                        }
+
+                        if (info->collision & 8)
+                            sh -= TO_FIXED(1);
+
+                        DrawRectangle(x + w, sy, TO_FIXED(1), sh, 0xFFFF00, 0xC0, INK_ALPHA, false);
+                    }
+                    break;
+
+                case H_TYPE_PLAT:
+                    DrawRectangle(x, y, w, h, 0x00FF00, 0x60, INK_ALPHA, false);
+
+                    if (info->collision & 1) // top
+                        DrawRectangle(x, y, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
+
+                    if (info->collision & 8) // bottom
+                        DrawRectangle(x, y + h, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
+                    break;
+            }
+        }
+    }
+
+    if (engine.showPaletteOverlay) {
+        for (int32 p = 0; p < PALETTE_BANK_COUNT; ++p) {
+            int32 x = (videoSettings.pixWidth - (0x10 << 3));
+            int32 y = (SCREEN_YSIZE - (0x10 << 2));
+
+            for (int32 c = 0; c < PALETTE_BANK_SIZE; ++c) {
+                uint32 clr = GetPaletteEntry(p, c);
+
+                DrawRectangle(x + ((c & 0xF) << 1) + ((p % (PALETTE_BANK_COUNT / 2)) * (2 * 16)),
+                                y + ((c >> 4) << 1) + ((p / (PALETTE_BANK_COUNT / 2)) * (2 * 16)), 2, 2, clr, 0xFF, INK_NONE, true);
+            }
+        }
+    }
+
+#endif
+}
+
 void RSDK::ProcessObjectDrawLists()
 {
     if (sceneInfo.state && sceneInfo.state != (ENGINESTATE_LOAD | ENGINESTATE_STEPOVER)) {
+        std::vector<std::thread> threads;
         for (int32 s = 0; s < videoSettings.screenCount; ++s) {
-            currentScreen             = &screens[s];
-            sceneInfo.currentScreenID = s;
-
-            for (int32 l = 0; l < DRAWGROUP_COUNT; ++l) drawGroups[l].layerCount = 0;
-
-            for (int32 t = 0; t < LAYER_COUNT; ++t) {
-                uint8 drawGroup = tileLayers[t].drawGroup[s];
-
-                if (drawGroup < DRAWGROUP_COUNT)
-                    drawGroups[drawGroup].layerDrawList[drawGroups[drawGroup].layerCount++] = t;
-            }
-
-            sceneInfo.currentDrawGroup = 0;
-            for (int32 l = 0; l < DRAWGROUP_COUNT; ++l) {
-                if (engine.drawGroupVisible[l]) {
-                    DrawList *list = &drawGroups[l];
-
-                    if (list->hookCB)
-                        list->hookCB();
-
-                    if (list->sorted) {
-                        for (int32 e = 0; e < list->entityCount; ++e) {
-                            for (int32 i = list->entityCount - 1; i > e; --i) {
-                                int32 slot1 = list->entries[i - 1];
-                                int32 slot2 = list->entries[i];
-                                if (objectEntityList[slot2].zdepth > objectEntityList[slot1].zdepth) {
-                                    list->entries[i - 1] = slot2;
-                                    list->entries[i]     = slot1;
-                                }
-                            }
-                        }
-                    }
-
-                    for (int32 i = 0; i < list->entityCount; ++i) {
-                        sceneInfo.entitySlot = list->entries[i];
-                        validDraw            = false;
-                        sceneInfo.entity     = &objectEntityList[list->entries[i]];
-                        if (sceneInfo.entity->visible) {
-                            if (objectClassList[stageObjectIDs[sceneInfo.entity->classID]].draw)
-                                objectClassList[stageObjectIDs[sceneInfo.entity->classID]].draw();
-
-#if RETRO_VER_EGS || RETRO_USE_DUMMY_ACHIEVEMENTS
-                            if (i == list->entityCount - 1)
-                                SKU::DrawAchievements();
-#endif
-
-                            sceneInfo.entity->onScreen |= validDraw << sceneInfo.currentScreenID;
-                        }
-                    }
-
-                    for (int32 i = 0; i < list->layerCount; ++i) {
-                        TileLayer *layer = &tileLayers[list->layerDrawList[i]];
-
-#if RETRO_USE_MOD_LOADER
-                        RunModCallbacks(MODCB_ONSCANLINECB, (void *)layer->scanlineCallback);
-#endif
-                        if (layer->scanlineCallback)
-                            layer->scanlineCallback(scanlines);
-                        else
-                            ProcessParallax(layer);
-
-                        switch (layer->type) {
-                            case LAYER_HSCROLL: DrawLayerHScroll(layer); break;
-                            case LAYER_VSCROLL: DrawLayerVScroll(layer); break;
-                            case LAYER_ROTOZOOM: DrawLayerRotozoom(layer); break;
-                            case LAYER_BASIC: DrawLayerBasic(layer); break;
-                            default: break;
-                        }
-                    }
-
-#if RETRO_USE_MOD_LOADER
-                    RunModCallbacks(MODCB_ONDRAW, INT_TO_VOID(l));
-#endif
-
-                    if (currentScreen->clipBound_X1 > 0)
-                        currentScreen->clipBound_X1 = 0;
-
-                    if (currentScreen->clipBound_Y1 > 0)
-                        currentScreen->clipBound_Y1 = 0;
-
-                    if (currentScreen->size.x >= 0) {
-                        if (currentScreen->clipBound_X2 < currentScreen->size.x)
-                            currentScreen->clipBound_X2 = currentScreen->size.x;
-                    }
-                    else {
-                        currentScreen->clipBound_X2 = 0;
-                    }
-
-                    if (currentScreen->size.y >= 0) {
-                        if (currentScreen->clipBound_Y2 < currentScreen->size.y)
-                            currentScreen->clipBound_Y2 = currentScreen->size.y;
-                    }
-                    else {
-                        currentScreen->clipBound_Y2 = 0;
-                    }
-                }
-
-                sceneInfo.currentDrawGroup++;
-            }
-
-#if !RETRO_USE_ORIGINAL_CODE
-            if (showHitboxes) {
-                for (int32 i = 0; i < debugHitboxCount; ++i) {
-                    DebugHitboxInfo *info = &debugHitboxList[i];
-                    int32 x               = info->pos.x + TO_FIXED(info->hitbox.left);
-                    int32 y               = info->pos.y + TO_FIXED(info->hitbox.top);
-                    int32 w               = abs((info->pos.x + TO_FIXED(info->hitbox.right)) - x);
-                    int32 h               = abs((info->pos.y + TO_FIXED(info->hitbox.bottom)) - y);
-
-                    switch (info->type) {
-                        case H_TYPE_TOUCH: DrawRectangle(x, y, w, h, info->collision ? 0x808000 : 0xFF0000, 0x60, INK_ALPHA, false); break;
-
-                        case H_TYPE_CIRCLE:
-                            DrawCircle(info->pos.x, info->pos.y, info->hitbox.left, info->collision ? 0x808000 : 0xFF0000, 0x60, INK_ALPHA, false);
-                            break;
-
-                        case H_TYPE_BOX:
-                            DrawRectangle(x, y, w, h, 0x0000FF, 0x60, INK_ALPHA, false);
-
-                            if (info->collision & 1) // top
-                                DrawRectangle(x, y, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
-
-                            if (info->collision & 8) // bottom
-                                DrawRectangle(x, y + h, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
-
-                            if (info->collision & 2) { // left
-                                int32 sy = y;
-                                int32 sh = h;
-
-                                if (info->collision & 1) {
-                                    sy += TO_FIXED(1);
-                                    sh -= TO_FIXED(1);
-                                }
-
-                                if (info->collision & 8)
-                                    sh -= TO_FIXED(1);
-
-                                DrawRectangle(x, sy, TO_FIXED(1), sh, 0xFFFF00, 0xC0, INK_ALPHA, false);
-                            }
-
-                            if (info->collision & 4) { // right
-                                int32 sy = y;
-                                int32 sh = h;
-
-                                if (info->collision & 1) {
-                                    sy += TO_FIXED(1);
-                                    sh -= TO_FIXED(1);
-                                }
-
-                                if (info->collision & 8)
-                                    sh -= TO_FIXED(1);
-
-                                DrawRectangle(x + w, sy, TO_FIXED(1), sh, 0xFFFF00, 0xC0, INK_ALPHA, false);
-                            }
-                            break;
-
-                        case H_TYPE_PLAT:
-                            DrawRectangle(x, y, w, h, 0x00FF00, 0x60, INK_ALPHA, false);
-
-                            if (info->collision & 1) // top
-                                DrawRectangle(x, y, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
-
-                            if (info->collision & 8) // bottom
-                                DrawRectangle(x, y + h, w, TO_FIXED(1), 0xFFFF00, 0xC0, INK_ALPHA, false);
-                            break;
-                    }
-                }
-            }
-
-            if (engine.showPaletteOverlay) {
-                for (int32 p = 0; p < PALETTE_BANK_COUNT; ++p) {
-                    int32 x = (videoSettings.pixWidth - (0x10 << 3));
-                    int32 y = (SCREEN_YSIZE - (0x10 << 2));
-
-                    for (int32 c = 0; c < PALETTE_BANK_SIZE; ++c) {
-                        uint32 clr = GetPaletteEntry(p, c);
-
-                        DrawRectangle(x + ((c & 0xF) << 1) + ((p % (PALETTE_BANK_COUNT / 2)) * (2 * 16)),
-                                      y + ((c >> 4) << 1) + ((p / (PALETTE_BANK_COUNT / 2)) * (2 * 16)), 2, 2, clr, 0xFF, INK_NONE, true);
-                    }
-                }
-            }
-
-#endif
-
-            currentScreen++;
-            sceneInfo.currentScreenID++;
+            threads.emplace_back(std::thread(ProcessLayers,s));
         }
+        for (auto& th : threads)
+            th.join();
+        currentScreen++;
+        sceneInfo.currentScreenID++;
     }
 }
 

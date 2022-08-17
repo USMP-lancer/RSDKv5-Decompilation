@@ -100,7 +100,7 @@ target_link_libraries("${ELF}"
   SceIofilemgr_stub
   SceSsl_stub
   SceSysmodule_stub
-  pthread
+  -Wl,--whole-archive pthread -Wl,--no-whole-archive
   ${SDL2_LIBRARIES}
   gcc
   g
