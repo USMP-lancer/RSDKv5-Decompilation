@@ -4,8 +4,8 @@ set(CMAKE_TOOLCHAIN_FILE "$ENV{VITASDK}/share/vita.toolchain.cmake" CACHE PATH "
 set(VITASDK_CMAKE_FILE "$ENV{VITASDK}/share/vita.cmake" CACHE PATH "VitaSDK CMake functions file")
 include("${VITASDK_CMAKE_FILE}" REQUIRED)
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -O2 -fsigned-char -Wall")
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -O2 -fsigned-char -fpermissive -std=c++17")
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -ffast-math -O3 -fsigned-char -Wall")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -ffast-math -O3 -fsigned-char -fpermissive -std=c++17")
 set(VITA_MKSFOEX_FLAGS "${VITA_MKSFOEX_FLAGS} -d PARENTAL_LEVEL=1 -d ATTRIBUTE2=12")
 set(VITA_ELF_CREATE_FLAGS "")
 
@@ -21,8 +21,8 @@ include_directories(
   dependencies/all/iniparser/
   "$ENV{VITASDK}/arm-vita-eabi/include/SDL2"
   "$ENV{VITASDK}/arm-vita-eabi/include/freetype2"
-  Game/
-  Game/Objects/
+  #Game/
+  #Game/Objects/
 )
 
 # Build self
@@ -35,8 +35,8 @@ file(GLOB_RECURSE Game_SRC
 )
 
 add_executable("${ELF}"
-  Game/Game.c
-  Game/Objects/All.c
+  #Game/Game.c
+  #Game/Objects/All.c
   RSDKv5/main.cpp
   RSDKv5/RSDK/Core/RetroEngine.cpp
   RSDKv5/RSDK/Core/Math.cpp
@@ -71,7 +71,7 @@ add_executable("${ELF}"
   dependencies/all/miniz/miniz.c
 )
 
-target_compile_definitions("${ELF}" PUBLIC -DBASE_PATH="ux0:data/Mania/" -DGAME_MAIN=main -DRETRO_REVISION=3 -DRETRO_STANDALONE=0 -DRETRO_USE_ORIGINAL_CODE=0 -DRETRO_USE_MOD_LOADER=0 -DRETRO_DISABLE_LOG=1 -D__VITA__)
+target_compile_definitions("${ELF}" PUBLIC -DBASE_PATH="ux0:data/Mania/" -DRETRO_REVISION=3 -DRETRO_DISABLE_LOG=1 -D__VITA__)
 
 target_link_libraries("${ELF}"
   SDL2
@@ -102,6 +102,10 @@ target_link_libraries("${ELF}"
   SceSysmodule_stub
   SceNet_stub
   SceNetCtl_stub
+  dl
+  taihen_stub
+  SceKernelModulemgr_stub
+  SceSblSsMgr_stub
   -Wl,--whole-archive pthread -Wl,--no-whole-archive
   ${SDL2_LIBRARIES}
   gcc
