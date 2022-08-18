@@ -2,7 +2,7 @@
 #include "main.hpp"
 
 #ifdef __vita__
-int _newlib_heap_size_user = 256 * 1024 * 1024;
+int _newlib_heap_size_user = 300 * 1024 * 1024;
 #include <psp2/sysmodule.h>
 #endif
 
