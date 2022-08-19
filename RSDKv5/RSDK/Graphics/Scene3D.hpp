@@ -153,11 +153,17 @@ inline void Prepare3DScene(uint16 sceneID)
 
         scn->vertexCount = 0;
         scn->faceCount   = 0;
-
+#ifdef __vita__
+        sceClibMemset(scn->vertices, 0, sizeof(Scene3DVertex) * scn->vertLimit);
+        sceClibMemset(scn->normals, 0, sizeof(Scene3DVertex) * scn->vertLimit);
+        sceClibMemset(scn->faceVertCounts, 0, sizeof(uint8) * scn->vertLimit);
+        sceClibMemset(scn->faceBuffer, 0, sizeof(Scene3DFace) * scn->vertLimit);
+#else
         memset(scn->vertices, 0, sizeof(Scene3DVertex) * scn->vertLimit);
         memset(scn->normals, 0, sizeof(Scene3DVertex) * scn->vertLimit);
         memset(scn->faceVertCounts, 0, sizeof(uint8) * scn->vertLimit);
         memset(scn->faceBuffer, 0, sizeof(Scene3DFace) * scn->vertLimit);
+#endif
     }
 }
 

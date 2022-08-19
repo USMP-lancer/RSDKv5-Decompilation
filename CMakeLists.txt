@@ -201,6 +201,7 @@ elseif(VITA)
       SceSysmodule_stub
       SceNet_stub
       SceNetCtl_stub
+      SceLibKernel_stub
       dl
       taihen_stub
       SceKernelModulemgr_stub

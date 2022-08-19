@@ -1,6 +1,11 @@
 #ifndef RETROENGINE_H
 #define RETROENGINE_H
 
+#ifdef __vita__
+#include <thread>
+#include <psp2/kernel/clib.h>
+#endif
+
 // ================
 // STANDARD LIBS
 // ================

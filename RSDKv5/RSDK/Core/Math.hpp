@@ -23,7 +23,11 @@ struct Vector2 {
     int32 y;
 };
 
+#ifdef __vita__
+#define MEM_ZERO(x) sceClibMemset(&(x), 0, sizeof((x)))
+#else
 #define MEM_ZERO(x) memset(&(x), 0, sizeof((x)))
+#endif
 
 extern int32 sin1024LookupTable[0x400];
 extern int32 cos1024LookupTable[0x400];
