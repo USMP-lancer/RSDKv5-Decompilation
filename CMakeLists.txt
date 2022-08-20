@@ -165,6 +165,7 @@ elseif(VITA)
       dependencies/all/
       dependencies/all/tinyxml2/
       dependencies/all/iniparser/
+      dependencies/all/thread-pool
       "$ENV{VITASDK}/arm-vita-eabi/include/SDL2"
       "$ENV{VITASDK}/arm-vita-eabi/include/freetype2"
     )
@@ -227,7 +228,7 @@ elseif(VITA)
     vita_create_vpk("${VPK}" "${TITLE_ID}" eboot.bin
       NAME "${TITLE_NAME}"
       VERSION "${TITLE_VER}"
-      FILE mania_livearea sce_sys
+      FILE vita/mania_livearea sce_sys
     )
 
 endif()

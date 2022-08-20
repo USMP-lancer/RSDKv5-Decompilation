@@ -133,10 +133,11 @@ CXXFLAGS_ALL += $(CXXFLAGS) \
 LDFLAGS_ALL = $(LDFLAGS)
 
 RSDK_INCLUDES  += \
-	-I./RSDKv5/ 					\
-	-I./dependencies/all/ 			\
-	-I./dependencies/all/tinyxml2/ 	\
-	-I./dependencies/all/iniparser/
+	-I./RSDKv5/ 							\
+	-I./dependencies/all/ 					\
+	-I./dependencies/all/tinyxml2/ 			\
+	-I./dependencies/all/iniparser/ 		\
+	-I./dependencies/all/libpng/thread-pool \
 
 # Main Sources
 RSDK_SOURCES += \

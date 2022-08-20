@@ -4,7 +4,9 @@
 #include "Legacy/ObjectLegacy.cpp"
 #endif
 
-#include <thread>
+#include "../../../dependencies/all/thread-pool/BS_thread_pool.hpp"
+
+BS::thread_pool pool;
 
 using namespace RSDK;
 
@@ -747,16 +749,19 @@ void ProcessLayers(int s) {
                 list->hookCB();
 
             if (list->sorted) {
-                for (int32 e = 0; e < list->entityCount; ++e) {
-                    for (int32 i = list->entityCount - 1; i > e; --i) {
-                        int32 slot1 = list->entries[i - 1];
-                        int32 slot2 = list->entries[i];
-                        if (objectEntityList[slot2].zdepth > objectEntityList[slot1].zdepth) {
-                            list->entries[i - 1] = slot2;
-                            list->entries[i]     = slot1;
-                        }
-                    }
-                }
+                // for (int32 e = 0; e < list->entityCount; ++e) {
+                //     for (int32 i = list->entityCount - 1; i > e; --i) {
+                //         int32 slot1 = list->entries[i - 1];
+                //         int32 slot2 = list->entries[i];
+                //         if (objectEntityList[slot2].zdepth > objectEntityList[slot1].zdepth) {
+                //             list->entries[i - 1] = slot2;
+                //             list->entries[i]     = slot1;
+                //         }
+                //     }
+                // }
+                std::sort(list->entries, list->entries + list->entityCount, [](uint16& a, uint16& b){
+                    return objectEntityList[a].zdepth > objectEntityList[b].zdepth;
+                });
             }
 
             for (int32 i = 0; i < list->entityCount; ++i) {
@@ -914,12 +919,11 @@ void ProcessLayers(int s) {
 void RSDK::ProcessObjectDrawLists()
 {
     if (sceneInfo.state && sceneInfo.state != (ENGINESTATE_LOAD | ENGINESTATE_STEPOVER)) {
-        std::vector<std::thread> threads;
+        BS::multi_future<void> threads;
         for (int32 s = 0; s < videoSettings.screenCount; ++s) {
-            threads.emplace_back(std::thread(ProcessLayers,s));
+            threads.push_back(pool.submit(ProcessLayers, s));
         }
-        for (auto& th : threads)
-            th.join();
+        threads.wait();
         currentScreen++;
         sceneInfo.currentScreenID++;
     }
