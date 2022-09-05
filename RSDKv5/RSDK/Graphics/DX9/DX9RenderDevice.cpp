@@ -599,6 +599,9 @@ bool RenderDevice::InitGraphicsAPI()
     }
 
     int32 maxPixHeight = 0;
+#if !RETRO_USE_ORIGINAL_CODE
+    int32 screenWidth = 0;
+#endif
     for (int32 s = 0; s < SCREEN_COUNT; ++s) {
         if (videoSettings.pixHeight > maxPixHeight)
             maxPixHeight = videoSettings.pixHeight;
@@ -606,7 +609,11 @@ bool RenderDevice::InitGraphicsAPI()
         screens[s].size.y = videoSettings.pixHeight;
 
         float viewAspect  = viewSize.x / viewSize.y;
+#if !RETRO_USE_ORIGINAL_CODE
+        screenWidth = (int32)((viewAspect * videoSettings.pixHeight) + 3) & 0xFFFFFFFC;
+#else
         int32 screenWidth = (int32)((viewAspect * videoSettings.pixHeight) + 3) & 0xFFFFFFFC;
+#endif
         if (screenWidth < videoSettings.pixWidth)
             screenWidth = videoSettings.pixWidth;
 
@@ -646,7 +653,11 @@ bool RenderDevice::InitGraphicsAPI()
         dx9Device->SetViewport(&dx9ViewPort);
     }
 
+#if !RETRO_USE_ORIGINAL_CODE
+    if (screenWidth <= 512 && maxPixHeight <= 256) {
+#else
     if (maxPixHeight <= 256) {
+#endif
         textureSize.x = 512.0;
         textureSize.y = 256.0;
     }
@@ -1081,6 +1092,10 @@ void RenderDevice::ProcessEvent(MSG Msg)
                         changedVideoSettings = false;
                         handledMsg           = true;
                     }
+
+#if !RETRO_REV02 && RETRO_INPUTDEVICE_KEYBOARD
+                    RSDK::SKU::specialKeyStates[1] = true;
+#endif
                     break;
 
                 case VK_F4: // alt + f4
@@ -1154,6 +1169,10 @@ void RenderDevice::ProcessEvent(MSG Msg)
                         SKU::UpdateKeyState(activeButtons);
 #endif
                     }
+
+#if !RETRO_REV02 && RETRO_INPUTDEVICE_KEYBOARD
+                    RSDK::SKU::specialKeyStates[0] = true;
+#endif
                     break;
 
 #if !RETRO_USE_ORIGINAL_CODE
@@ -1300,6 +1319,18 @@ void RenderDevice::ProcessEvent(MSG Msg)
 #endif
                     break;
 
+#if !RETRO_REV02 && RETRO_INPUTDEVICE_KEYBOARD
+                case VK_ESCAPE:
+                    RSDK::SKU::specialKeyStates[0] = false;
+                    SKU::ClearKeyState(activeButtons);
+                    break;
+
+                case VK_RETURN:
+                    RSDK::SKU::specialKeyStates[1] = false;
+                    SKU::ClearKeyState(activeButtons);
+                    break;
+#endif
+
                 case VK_BACK:
                     engine.gameSpeed = 1;
 
@@ -1310,22 +1341,39 @@ void RenderDevice::ProcessEvent(MSG Msg)
             break;
         }
 
-        case WM_LBUTTONDOWN:
-            touchInfo.down[0] = 1;
-            touchInfo.count   = 1;
+        case WM_LBUTTONDOWN: touchInfo.down[0] = 1; touchInfo.count = 1;
+
+#if !RETRO_REV02
+            RSDK::SKU::buttonDownCount++;
+#endif
 
             handledMsg = true;
             break;
 
-        case WM_LBUTTONUP:
-            touchInfo.down[0] = 0;
-            touchInfo.count   = 0;
+        case WM_LBUTTONUP: touchInfo.down[0] = 0; touchInfo.count = 0;
+
+#if !RETRO_REV02
+            RSDK::SKU::buttonDownCount--;
+#endif
 
             handledMsg = true;
             break;
 
-        case WM_MBUTTONDOWN:
-        case WM_RBUTTONDOWN: handledMsg = true; break;
+        case WM_MBUTTONDOWN: handledMsg = true; break;
+
+        case WM_RBUTTONDOWN: handledMsg = true;
+#if !RETRO_REV02 && RETRO_INPUTDEVICE_KEYBOARD
+            RSDK::SKU::specialKeyStates[3] = true;
+            RSDK::SKU::buttonDownCount++;
+#endif
+            break;
+
+        case WM_RBUTTONUP: handledMsg = true;
+#if !RETRO_REV02 && RETRO_INPUTDEVICE_KEYBOARD
+            RSDK::SKU::specialKeyStates[3] = false;
+            RSDK::SKU::buttonDownCount--;
+#endif
+            break;
     }
 
     if (!handledMsg)
@@ -1384,7 +1432,8 @@ LRESULT CALLBACK RenderDevice::WindowEventCallback(HWND hRecipient, UINT message
 
                 if (AudioDevice::audioFocus == 1) {
                     AudioDevice::audioFocus = 0;
-                    AudioDevice::sourceVoice->Start(0, 0);
+                    if (AudioDevice::sourceVoice)
+                        AudioDevice::sourceVoice->Start(0, 0);
                 }
 
                 GetDisplays();
@@ -1402,7 +1451,8 @@ LRESULT CALLBACK RenderDevice::WindowEventCallback(HWND hRecipient, UINT message
 
                 if (!AudioDevice::audioFocus) {
                     AudioDevice::audioFocus = 1;
-                    AudioDevice::sourceVoice->Stop(0, 0);
+                    if (AudioDevice::sourceVoice)
+                        AudioDevice::sourceVoice->Stop(0, 0);
                 }
 
                 videoSettings.windowState = WINDOWSTATE_INACTIVE;

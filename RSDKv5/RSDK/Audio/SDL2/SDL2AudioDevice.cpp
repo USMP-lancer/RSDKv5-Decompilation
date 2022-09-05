@@ -46,7 +46,7 @@ void AudioDevice::Release()
     UnlockAudioDevice();
 
     SDL_CloseAudioDevice(AudioDevice::device);
-    SDL_Quit();
+    SDL_QuitSubSystem(SDL_INIT_AUDIO);
 }
 
 void AudioDevice::ProcessAudioMixing(void *stream, int32 length)
@@ -69,8 +69,11 @@ void AudioDevice::ProcessAudioMixing(void *stream, int32 length)
                 SAMPLE_FORMAT *sfxBuffer = &channel->samplePtr[channel->bufferPos];
 
                 // somehow it can get here and not have any data to play, causing a crash. This should fix that
-                if (!sfxBuffer)
+                if (!sfxBuffer) {
+                    channel->state   = CHANNEL_IDLE;
+                    channel->soundID = -1;
                     continue;
+                }
 
                 float volL = channel->volume, volR = channel->volume;
                 if (channel->pan < 0.0)
@@ -117,8 +120,11 @@ void AudioDevice::ProcessAudioMixing(void *stream, int32 length)
                 SAMPLE_FORMAT *streamBuffer = &channel->samplePtr[channel->bufferPos];
 
                 // somehow it can get here and not have any data to play, causing a crash. This should fix that
-                if (!streamBuffer)
+                if (!streamBuffer) {
+                    channel->state   = CHANNEL_IDLE;
+                    channel->soundID = -1;
                     continue;
+                }
 
                 float volL = channel->volume, volR = channel->volume;
                 if (channel->pan < 0.0)

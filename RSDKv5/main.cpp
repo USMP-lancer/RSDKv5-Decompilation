@@ -98,11 +98,11 @@ int32 RSDK_main(int32 argc, char **argv, void *linkLogicPtr)
 
     RSDK::linkGameLogic = (RSDK::LogicLinkHandle)linkLogicPtr;
 
+    RSDK::InitCoreAPI();
+
     int32 exitCode = RSDK::RunRetroEngine(argc, argv);
 
-#ifdef __SWITCH__
-    // socketExit();
-#endif
+    RSDK::ReleaseCoreAPI();
 
     return exitCode;
 }
