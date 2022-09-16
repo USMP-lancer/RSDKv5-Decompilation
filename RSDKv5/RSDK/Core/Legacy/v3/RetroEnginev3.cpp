@@ -100,9 +100,7 @@ bool32 RSDK::Legacy::v3::LoadGameConfig(const char *filepath)
             strcpy(scene->name, "_RSDK_SCENE");
             strcpy(scene->folder, currentSceneFolder);
             strcpy(scene->id, currentSceneID);
-#if RETRO_REV02
             scene->filter = sceneInfo.filter;
-#endif
             GEN_HASH_MD5(scene->name, scene->hash);
 
             // Override existing values
@@ -464,8 +462,12 @@ void RSDK::Legacy::v3::RetroEngineCallback(int32 callbackID)
 void RSDK::Legacy::v3::LoadXMLVariables()
 {
     FileInfo info;
-    for (int32 m = 0; m < (int32)ActiveMods().size(); ++m) {
+
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 m = 0; m < activeModCount; ++m) {
         SetActiveMod(m);
+
+        InitFileInfo(&info);
         if (LoadFile(&info, "Data/Game/Game.xml", FMODE_RB)) {
             tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
 
@@ -512,8 +514,12 @@ void RSDK::Legacy::v3::LoadXMLVariables()
 void RSDK::Legacy::v3::LoadXMLPalettes()
 {
     FileInfo info;
-    for (int32 m = 0; m < (int32)ActiveMods().size(); ++m) {
+
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 m = 0; m < activeModCount; ++m) {
         SetActiveMod(m);
+
+        InitFileInfo(&info);
         if (LoadFile(&info, "Data/Game/Game.xml", FMODE_RB)) {
             tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
 
@@ -575,8 +581,11 @@ void RSDK::Legacy::v3::LoadXMLObjects()
     FileInfo info;
     modObjCount = 0;
 
-    for (int32 m = 0; m < (int32)ActiveMods().size(); ++m) {
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 m = 0; m < activeModCount; ++m) {
         SetActiveMod(m);
+
+        InitFileInfo(&info);
         if (LoadFile(&info, "Data/Game/Game.xml", FMODE_RB)) {
             tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
 
@@ -639,8 +648,11 @@ void RSDK::Legacy::v3::LoadXMLSoundFX()
 {
     FileInfo info;
 
-    for (int32 m = 0; m < (int32)ActiveMods().size(); ++m) {
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 m = 0; m < activeModCount; ++m) {
         SetActiveMod(m);
+
+        InitFileInfo(&info);
         if (LoadFile(&info, "Data/Game/Game.xml", FMODE_RB)) {
             tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
 
@@ -692,8 +704,11 @@ void RSDK::Legacy::v3::LoadXMLPlayers()
 {
     FileInfo info;
 
-    for (int32 m = 0; m < (int32)ActiveMods().size(); ++m) {
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 m = 0; m < activeModCount; ++m) {
         SetActiveMod(m);
+
+        InitFileInfo(&info);
         if (LoadFile(&info, "Data/Game/Game.xml", FMODE_RB)) {
             tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
 
@@ -738,8 +753,11 @@ int32 RSDK::Legacy::v3::LoadXMLStages(int32 mode, int32 gcStageCount)
     FileInfo info;
     int32 stageCount = 0;
 
-    for (int32 m = 0; m < (int32)ActiveMods().size(); ++m) {
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 m = 0; m < activeModCount; ++m) {
         SetActiveMod(m);
+
+        InitFileInfo(&info);
         if (LoadFile(&info, "Data/Game/Game.xml", FMODE_RB)) {
             tinyxml2::XMLDocument *doc = new tinyxml2::XMLDocument;
 
@@ -799,9 +817,7 @@ int32 RSDK::Legacy::v3::LoadXMLStages(int32 mode, int32 gcStageCount)
                                     sprintf_s(scene->folder, (int32)sizeof(scene->folder), "%s", stgFolder);
                                     sprintf_s(scene->id, (int32)sizeof(scene->id), "%s", stgID);
 
-#if RETRO_REV02
                                     scene->filter = 0xFF;
-#endif
 
                                     gcStageCount++;
                                     sceneInfo.listCategory[l].sceneCount++;

@@ -165,7 +165,8 @@ void RSDK::LoadModSettings()
     modSettings.forceScripts    = false;
 #endif
 
-    for (int32 i = (int32)ActiveMods().size() - 1; i >= 0; --i) {
+    int32 activeModCount = (int32)ActiveMods().size();
+    for (int32 i = activeModCount - 1; i >= 0; --i) {
         ModInfo *mod = &modList[i];
 
         if (mod->redirectSaveRAM) {
@@ -309,7 +310,7 @@ void RSDK::UnloadMods()
 
     // Clear storage
     dataStorage[DATASET_STG].usedStorage = 0;
-    ClearUnusedStorage(DATASET_MUS);
+    DefragmentAndGarbageCollectStorage(DATASET_MUS);
     dataStorage[DATASET_SFX].usedStorage = 0;
     dataStorage[DATASET_STR].usedStorage = 0;
     dataStorage[DATASET_TMP].usedStorage = 0;
